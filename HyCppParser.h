@@ -251,9 +251,7 @@ public:
 
 public:
 	/// 생성자
-	HyCppParser(
-		      HyUInt32  flag = (HyUInt32)( InitFlag::UseDataFile ),
-		const HyString& name = "CppParser");
+	HyCppParser( const HyString& name = "CppParser" );
 
 	/// CPP파일을 파싱한다.
 	HyBool Parse(

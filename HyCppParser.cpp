@@ -76,16 +76,13 @@ std::list< std::pair< TokenPos, TokenPos > > g_ranges;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// @brief	생성자
 ///
-/// @param	flag	플래그
 /// @param	name	이름
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-HyCppParser::HyCppParser(
-	      HyUInt32  flag,
-	const HyString& name)
+HyCppParser::HyCppParser( const HyString& name )
 :
 HyGrammarParser( name )
 {
-	Init( flag );
+	Init();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1095,6 +1092,7 @@ void HyCppParser::OnInit()
 	AddInputGrammar( type_definition_body_,					class_declaration_ typedef_names_ );
 	AddInputGrammar( type_definition_body_,					function_pointer_, TypeDefinitionBody_FunctionPointer);
 	AddInputGrammar( function_pointer_,						return_type_ "(" typedef_scope_type_ "*" variable_name_ ") (" function_parameters_ ")" class_member_const_, FunctionPointer );
+	AddInputGrammar( function_pointer_type_,				return_type_ "(" function_parameters_ ")" class_member_const_ );
 	AddInputGrammar( typedef_names_,						variable_pointers_ word_ next_typedef_name_, TypeDef_Names );
 	AddInputGrammar( next_typedef_name_,					"," typedef_names_ );
 	AddInputGrammar( next_typedef_name_,					"[e]" );
@@ -1136,6 +1134,7 @@ void HyCppParser::OnInit()
 	AddInputGrammar( template_specification_begin_,			"[e]", EmptySpecifiedValues );
 	AddInputGrammar( specified_values_,						variable_type_ next_specified_value_, SpecifiedValues );
 	AddInputGrammar( specified_values_,						right_value_ next_specified_value_, SpecifiedValues );
+	AddInputGrammar( specified_values_,						function_pointer_type_ );
 	AddInputGrammar( next_specified_value_,					"," specified_values_ );
 	AddInputGrammar( next_specified_value_,					"[e]" );
 
@@ -1331,8 +1330,11 @@ void HyCppParser::OnInit()
 
 	// enumeration
 	AddInputGrammar( enum_declaration_,						"enum" enum_name_ "{" enum_elements_ last_enum_elements_comma_ "}" );
+	AddInputGrammar( enum_declaration_,						"enum class" enum_name_ enum_type_ "{" enum_elements_ last_enum_elements_comma_ "}" );
 	AddInputGrammar( enum_name_,							word_ );
 	AddInputGrammar( enum_name_,							"[e]" );
+	AddInputGrammar( enum_type_,							":" word_ );
+	AddInputGrammar( enum_type_,							"[e]" );
 	AddInputGrammar( enum_elements_,						enum_element_ next_enum_element_ );
 	AddInputGrammar( enum_elements_,						"[e]" );
 	AddInputGrammar( next_enum_element_,					"," enum_element_ next_enum_element_ );
@@ -1597,7 +1599,7 @@ HyBool HyCppParser::Parse(
 	g_listNamespace.clear();
 	g_listNamespace.push_back( &parsingResult.m_globalNamespace );
 
-	/*
+	//*
 	HyCppPreprocessor cppPreprocessor;
 	cppPreprocessor.AddIncludeDirectory( includeDirectories );
 	cppPreprocessor.AddDefinition( definitions );
