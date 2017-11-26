@@ -1081,6 +1081,7 @@ void HyCppParser::OnInit()
 	AddInputGrammar( first_level_statement_,				enum_declaration_ ";" );
 	AddInputGrammar( first_level_statement_,				using_ namespace_ scope_name_ ";" );
 	AddInputGrammar( first_level_statement_,				class_templates_ using_ word_ "=" scope_name_ ";" );
+	AddInputGrammar( first_level_statement_,				class_templates_ using_ word_ "=" variable_type_ ";" );
 	AddInputGrammar( first_level_statement_,				extern_ word_ "{" first_level_statements_ "}" );
 	
 	AddInputGrammar( namespace_area_,						namespace_ namespace_name_ "{" first_level_statements_ "}", NamespaceArea );
@@ -1117,8 +1118,7 @@ void HyCppParser::OnInit()
 	AddInputGrammar( template_classes_,						"[e]" );
 	AddInputGrammar( next_template_class_,					"," template_classes_ );
 	AddInputGrammar( next_template_class_,					"[e]" );
-	AddInputGrammar( template_class_,						variable_type_ class_assign_, TemplateClass );
-	AddInputGrammar( template_class_,						variable_type_ variable_name_ class_assign_, TemplateClass );
+	AddInputGrammar( template_class_,						variable_type_ evariable_name_ class_assign_, TemplateClass );
 	AddInputGrammar( class_assign_,							"=" right_expression_ );
 	AddInputGrammar( class_assign_,							"[e]" );
 
@@ -1209,6 +1209,8 @@ void HyCppParser::OnInit()
 	AddInputGrammar( class_member_virtual_,					"virtual", ClassMemberVirtual );
 	AddInputGrammar( class_member_virtual_,					"[e]" );
 	AddInputGrammar( variable_name_,						scope_name_ );
+	AddInputGrammar( evariable_name_,						variable_name_ );
+	AddInputGrammar( evariable_name_,						"[e]" );
 	AddInputGrammar( function_name_,						word_, FunctionName_Word );
 	AddInputGrammar( function_name_,						"operator" operator_type_, FunctionName_Operator );
 	AddInputGrammar( operator_type_,						"=", OperatorType );
