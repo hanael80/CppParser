@@ -181,6 +181,7 @@
 #define typedef_scope_type_                 " typedef_scope_type "
 #define unsignable_type_                    " unsignable_type "
 #define using_                              " using "
+#define using_alias_                        " using_alias "
 #define variable_attribute_                 " variable_attribute "
 #define variable_attributes_                " variable_attributes "
 #define variable_attributes_begin_          " variable_attributes_begin "
@@ -200,5 +201,7 @@
 #define word_                               " word "
 
 // cpp11
-#define decltype_            " decltype "
-#define decltype_expression_ " decltype_expression "
+#define auto_                      " auto "
+#define decltype_                  " decltype "
+#define decltype_expression_       " decltype_expression "
+#define lambda_function_parameter_ " lambda_function_parameter "

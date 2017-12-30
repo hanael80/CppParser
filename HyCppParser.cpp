@@ -1098,8 +1098,7 @@ void HyCppParser::OnInit()
 	AddInputGrammar( first_level_statement_,				variable_declaration_ ";" );
 	AddInputGrammar( first_level_statement_,				enum_declaration_ ";" );
 	AddInputGrammar( first_level_statement_,				using_ namespace_ scope_name_ ";" );
-	AddInputGrammar( first_level_statement_,				class_templates_ using_ word_ "=" scope_name_ ";" );
-	AddInputGrammar( first_level_statement_,				class_templates_ using_ word_ "=" variable_type_ ";" );
+	AddInputGrammar( first_level_statement_,				using_alias_ );
 	AddInputGrammar( first_level_statement_,				extern_ word_ "{" first_level_statements_ "}" );
 	
 	AddInputGrammar( namespace_area_,						namespace_ namespace_name_ "{" first_level_statements_ "}", NamespaceArea );
@@ -1117,6 +1116,9 @@ void HyCppParser::OnInit()
 	AddInputGrammar( next_typedef_name_,					"[e]" );
 	AddInputGrammar( typedef_scope_type_,					scope_type_ "::" );
 	AddInputGrammar( typedef_scope_type_,					"[e]" );
+
+	AddInputGrammar( using_alias_,							class_templates_ using_ word_ "=" scope_name_ ";" );
+	AddInputGrammar( using_alias_,							class_templates_ using_ word_ "=" variable_type_ ";" );
 
 	AddInputGrammar( second_level_statement_,				class_declaration_ ";" );
 	AddInputGrammar( second_level_statement_,				";" );
@@ -1169,6 +1171,7 @@ void HyCppParser::OnInit()
 	AddInputGrammar( class_statement_,						enum_declaration_ ";" );
 	AddInputGrammar( class_statement_,						type_definition_ ";", ClassStatement_TypeDefinition );
 	AddInputGrammar( class_statement_,						using_ scope_name_ ";" );
+	AddInputGrammar( class_statement_,						using_alias_ );
 	AddInputGrammar( class_statement_,						";" );
 	AddInputGrammar( class_access_,							"private", ClassAccessPrivate );
 	AddInputGrammar( class_access_,							"protected", ClassAccessProtected );
@@ -1453,6 +1456,8 @@ void HyCppParser::OnInit()
 	AddInputGrammar( next_right_expression16_,				"[" right_expression_ "]" next_right_expression16_ );
 	AddInputGrammar( next_right_expression16_,				"." right_expression16_ );
 	AddInputGrammar( next_right_expression16_,				"->" right_expression16_ );
+	AddInputGrammar( next_right_expression16_,				"->" right_expression16_ );
+	AddInputGrammar( next_right_expression16_,				target_call_ next_right_expression16_ );
 	AddInputGrammar( next_right_expression16_,				"[e]" );
 
 	AddInputGrammar( right_expression17_,					"(" right_expression_ ")" );
@@ -1460,15 +1465,13 @@ void HyCppParser::OnInit()
 
 	AddInputGrammar( right_expression18_,					right_value_ );
 
-	AddInputGrammar( left_value_,							scope_name_ target_call_ );
+	AddInputGrammar( left_value_,							scope_name_ );
 	AddInputGrammar( left_value_,							member_function_call_using_ptr_ );
 	AddInputGrammar( left_value_,							casting_value_ );
 	AddInputGrammar( right_value_,							"sizeof (" right_expression_ ")" );
 	AddInputGrammar( right_value_,							"true" );
 	AddInputGrammar( right_value_,							"false" );
 	AddInputGrammar( right_value_,							"number" fraction_, RightValue_Number );
-	AddInputGrammar( right_value_,							"lambda" );
-	AddInputGrammar( "lambda",								"[ " function_call_parameters_ "] (" function_parameters_ ")" function_body_ );
 	AddInputGrammar( fraction_,								". " fraction_number_ float_symbol_ exponent_ );
 	AddInputGrammar( fraction_,								"[e]" );
 	AddInputGrammar( fraction_number_,						"number" );
@@ -1498,10 +1501,8 @@ void HyCppParser::OnInit()
 	AddInputGrammar( casting_type_,                         "const_cast" );
 
 	AddInputGrammar( target_call_,							"(" function_call_parameters_ ")", TargetCall );
-	AddInputGrammar( target_call_,							"[e]" );
 
 	AddInputGrammar( variable_type_,						variable_type_body_, VariableType );
-	AddInputGrammar( variable_type_,						decltype_expression_ );
 	AddInputGrammar( variable_type_body_,					variable_attributes_ variable_typename_ scope_type_ variable_pointers_ variable_pointer_const_ variable_reference_mark_ );
 	AddInputGrammar( variable_pointer_type_,				variable_basic_type_ variable_pointers_ variable_pointer_const_ );
 	AddInputGrammar( variable_pointers_,					"*" variable_pointers_, VariablePointers_Pointer );
@@ -1606,8 +1607,17 @@ void HyCppParser::OnInit()
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 HyVoid HyCppParser::_AddCpp11Grammars()
 {
-	AddInputGrammar( variable_reference_mark_,	"&&", VariableReferenceMark_AndAnd );
-	AddInputGrammar( decltype_expression_,		decltype_ "(" right_expression_ ")", DeclType_Expression );
+	AddInputGrammar( variable_reference_mark_,		"&&", VariableReferenceMark_AndAnd );
+	AddInputGrammar( variable_type_,				decltype_expression_ );
+	AddInputGrammar( scope_type_,					auto_ );
+	AddInputGrammar( decltype_expression_,			decltype_ "(" right_expression_ ")", DeclType_Expression );
+	AddInputGrammar( right_value_,					"lambda" );
+	AddInputGrammar( "lambda",						"[ " function_call_parameters_ "] " lambda_function_parameter_ function_body_ );
+	AddInputGrammar( right_value_,					"{" function_call_parameters_ "}" );
+	AddInputGrammar( lambda_function_parameter_,	"(" function_parameters_ ")" );
+	AddInputGrammar( lambda_function_parameter_,	"[e]" );
+	AddInputGrammar( target_call_,					"{" function_call_parameters_ "}", TargetCall );
+	AddInputGrammar( class_member_function_tail_,	"= delete" );
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
