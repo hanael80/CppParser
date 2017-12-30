@@ -253,6 +253,9 @@ void UnnamedNamespace( const std::vector< const HyToken* >& vecToken, void* cons
 
 void TypeDefinitionBody_VariableType( const std::vector< const HyToken* >& vecToken, void* const pParam )
 {
+	if ( g_variableTypes.empty() )
+		LOG( HyLog::Fatal, "g_variableTypes.empty()" );
+
 	VarType& varType = g_variableTypes.back();
 
 	std::list< std::string >::const_iterator itrTypeDefName = g_listTypeDefName.begin();
@@ -1062,6 +1065,21 @@ void NextFunctionCallParameter( const std::vector< const HyToken* >& vecToken, v
 	++g_listFunctionCallParamCount.back();
 }
 
+HyVoid VariableReferenceMark_AndAnd( const std::vector< const HyToken* >& tokenList, HyVoid* param )
+{
+	VarType& varType = g_variableTypes.back();
+	if(varType.m_tail.empty())
+		varType.m_tail = "&&";
+	else
+		varType.m_tail += " &&";
+}
+
+HyVoid DeclType_Expression( const std::vector< const HyToken* >& tokenList, HyVoid* param )
+{
+	VarType varType;
+	g_variableTypes.push_back( varType );
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// @brief	초기화할때를 처리한다.
 ///
@@ -1473,26 +1491,29 @@ void HyCppParser::OnInit()
 	AddInputGrammar( member_function_call_using_ptr_,		"(" right_expression_ ". *" right_expression_ ")" target_call_ );
 	AddInputGrammar( member_function_call_using_ptr_,		"(" right_expression_ "-> *" right_expression_ ")" target_call_ );
 
-	AddInputGrammar( casting_value_,						"static_cast <" variable_type_ "> (" right_expression_ ")" );
-	AddInputGrammar( casting_value_,						"const_cast <" variable_type_ "> (" right_expression_ ")" );
+	AddInputGrammar( casting_value_,						casting_type_ "<" variable_type_ "> (" right_expression_ ")" );
 	AddInputGrammar( casting_value_,						"(" variable_type_ ")" right_expression_ );
 	AddInputGrammar( casting_value_,						"(" return_type_ "(" typedef_scope_type_ "* ) (" function_parameters_ ")" class_member_const_ ")" right_expression_ );
+	AddInputGrammar( casting_type_,                         "static_cast" );
+	AddInputGrammar( casting_type_,                         "const_cast" );
 
 	AddInputGrammar( target_call_,							"(" function_call_parameters_ ")", TargetCall );
 	AddInputGrammar( target_call_,							"[e]" );
 
-	AddInputGrammar( variable_type_,						variable_attributes_ variable_typename_ scope_type_ variable_pointers_ variable_pointer_const_ variable_reference_mark_, VariableType );
+	AddInputGrammar( variable_type_,						variable_type_body_, VariableType );
+	AddInputGrammar( variable_type_,						decltype_expression_ );
+	AddInputGrammar( variable_type_body_,					variable_attributes_ variable_typename_ scope_type_ variable_pointers_ variable_pointer_const_ variable_reference_mark_ );
 	AddInputGrammar( variable_pointer_type_,				variable_basic_type_ variable_pointers_ variable_pointer_const_ );
 	AddInputGrammar( variable_pointers_,					"*" variable_pointers_, VariablePointers_Pointer );
 	AddInputGrammar( variable_pointers_,					"[e]" );
 	AddInputGrammar( variable_pointer_const_,				"const" );
 	AddInputGrammar( variable_pointer_const_,				"[e]" );
 
-	AddInputGrammar( variable_reference_mark_,				"&", VariableReferenceMark_And);
+	AddInputGrammar( variable_reference_mark_,				"&", VariableReferenceMark_And );
 	AddInputGrammar( variable_reference_mark_,				"[e]" );
 
 	AddInputGrammar( variable_attributes_,					variable_attributes_begin_ variable_attribute_ next_variable_attributes_ );
-	AddInputGrammar( variable_attributes_,					"[e]",			VariableAttributesBegin);
+	AddInputGrammar( variable_attributes_,					"[e]",			VariableAttributesBegin );
 	AddInputGrammar( variable_attributes_begin_,			"[e]",			VariableAttributesBegin );
 	AddInputGrammar( variable_attribute_,					"const",		VariableAttribute_Const );
 	AddInputGrammar( next_variable_attributes_,				variable_attribute_ next_variable_attributes_ );
@@ -1574,6 +1595,19 @@ void HyCppParser::OnInit()
 	AddInputGrammar( next_function_call_parameter_,			"," function_call_parameter_ next_function_call_parameter_, NextFunctionCallParameter );
 	AddInputGrammar( next_function_call_parameter_,			"[e]" );
 	AddInputGrammar( function_call_parameter_,				right_expression_ );
+
+	_AddCpp11Grammars();
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// @brief	add cpp11 grammars
+///
+/// @return	no returns
+////////////////////////////////////////////////////////////////////////////////////////////////////
+HyVoid HyCppParser::_AddCpp11Grammars()
+{
+	AddInputGrammar( variable_reference_mark_,	"&&", VariableReferenceMark_AndAnd );
+	AddInputGrammar( decltype_expression_,		decltype_ "(" right_expression_ ")", DeclType_Expression );
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

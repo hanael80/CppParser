@@ -264,6 +264,9 @@ public:
 private:
 	/// 초기화할때를 처리한다.
 	virtual void OnInit() override;
+
+	/// add cpp11 grammars
+	HyVoid _AddCpp11Grammars();
 };
 
 #ifndef _LIB

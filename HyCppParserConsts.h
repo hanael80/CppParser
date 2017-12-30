@@ -14,6 +14,7 @@
 #define array_size_                         " array_size "
 #define array_variable_                     " array_variable "
 #define begin_variable_declaration_body_    " begin_variable_declaration_body "
+#define casting_type_                       " casting_type "
 #define casting_value_                      " casting_value "
 #define class_access_                       " class_access "
 #define class_assign_                       " class_assign "
@@ -193,6 +194,11 @@
 #define variable_reference_mark_            " variable_reference_mark "
 #define variable_static_                    " variable_static "
 #define variable_type_                      " variable_type "
+#define variable_type_body_                 " variable_type_body "
 #define variable_typename_                  " variable_typename "
 #define variable_types_                     " variable_types "
 #define word_                               " word "
+
+// cpp11
+#define decltype_            " decltype "
+#define decltype_expression_ " decltype_expression "
